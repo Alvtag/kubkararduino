@@ -37,8 +37,11 @@ const int outputPin_builtInLed = LED_BUILTIN;
 const int stateMachine_idle = 0;
 const int stateMachine_ready = 1;
 const int stateMachine_racing = 2;
-const int stateMachine_blinkDelay_ready = 500;
-const int stateMachine_blinkDelay_racing = 166;
+const unsigned long stateMachine_blinkDelay_idle = 1000;
+const unsigned long stateMachine_blinkDelay_ready = 500;
+const unsigned long stateMachine_blinkDelay_racing = 166;
+unsigned long stateMachine_blink_last_toggle_time = 0;
+int stateMachine_blink_state = LOW;
 
 int stateMachine_state = stateMachine_idle;
 
@@ -58,8 +61,6 @@ unsigned long laser3_interrupted_time = 0;
 unsigned long laser4_interrupted_time = 0;
 unsigned long laser5_interrupted_time = 0;
 
-//TODO blinking LED to indicate state
-
 void setup() {
   Serial.begin(9600);
   pinMode(outputPin_builtInLed, OUTPUT);
@@ -77,18 +78,21 @@ void setup() {
 
 void loop() {
   readAllPins();
-  //DEBUG
-  digitalWrite(outputPin_builtInLed, inputPin_Laser0_lastState);
-  //END DEBUG
   loopStateMachine();
 }
 
 /**
    IDLE: Nothing going on, waiting for signal from SERIAL to move to READY
-          The gate signal should read HIGH (gate closed) before moving to READY
-   READY: Gate should be closed a this state, Humans verify that the laser-input-pins
-          all read HIGH. Opening the gate (causing gate to read LOW) will move state to
-          RACING
+         The gate signal should read HIGH (gate closed) before moving to READY\
+         SLOW BLINK (0.5 Hz)
+
+   READY: Gate should be closed during this state, Humans verify that the laser-input-pins all
+          read HIGH. Opening the gate (causing gate to read LOW) will move state to RACING
+          MEDIUM BLINK (1 Hz)
+
+   RACING: After all lasers experience an interrupt (HIGH -> LOW) event, all times will be
+           reported over serial, then state will move back to IDLE.
+           RAPID BLINK (3 Hz)
 */
 void loopStateMachine() {
   controlLedForState();
@@ -100,7 +104,7 @@ void loopStateMachine() {
       }
       break;
     case stateMachine_ready:
-      Serial.println("STATE:READY");
+      Serial.print("STATE:READY");
       Serial.print("gateState:");
       Serial.println(inputPin_Gate_state);
       if (inputPin_Gate_state == LOW) {
@@ -110,10 +114,10 @@ void loopStateMachine() {
       }
       break;
     case stateMachine_racing:
-      Serial.println("RACING");
+      Serial.print("RACING ");
       checkLasersInterrupt();
       if (hasAllLasersInterrupted()) {
-        notifyRaceFinished()
+        notifyRaceFinished();
         stateMachine_state = stateMachine_idle;
         Serial.println("statemachine to IDLE");
       }
@@ -121,20 +125,50 @@ void loopStateMachine() {
   }
 }
 
+void controlLedForState() {
+  unsigned long currentTime = millis();
+  unsigned long delay = 0;
+  switch (stateMachine_state) {
+    case stateMachine_idle:
+      delay = stateMachine_blinkDelay_idle;
+      break;
+    case stateMachine_ready:
+      delay = stateMachine_blinkDelay_ready;
+      break;
+    case stateMachine_racing:
+      delay = stateMachine_blinkDelay_racing;
+      break;
+  }
+  if (currentTime - stateMachine_blink_last_toggle_time > delay ) {
+    stateMachine_blink_state = invertSignal(stateMachine_blink_state);
+    digitalWrite(outputPin_builtInLed, stateMachine_blink_state);
+    stateMachine_blink_last_toggle_time = currentTime;
+  }
+}
+
+boolean invertSignal(int state) {
+  if (state == HIGH) {
+    return LOW;
+  } else {
+    return HIGH;
+  }
+}
+
 void notifyRaceFinished() {
-  Serial.print("\nHeat finished!");
-  Serial.print("\nlaser0:");
+  Serial.print("RACE_END");
+  Serial.print(";0,");
   Serial.print(laser0_interrupted_time);
-  Serial.print("\nlaser1:");
+  Serial.print(";1,");
   Serial.print(laser1_interrupted_time);
-  Serial.print("\nlaser2:");
+  Serial.print(";2,");
   Serial.print(laser2_interrupted_time);
-  Serial.print("\nlaser3:");
+  Serial.print("35,");
   Serial.print(laser3_interrupted_time);
-  Serial.print("\nlaser4:");
+  Serial.print(";4,");
   Serial.print(laser4_interrupted_time);
-  Serial.print("\nlaser5:");
+  Serial.print(";5,");
   Serial.print(laser5_interrupted_time);
+  Serial.println("%%");
 }
 
 void clearRaceVariables() {
@@ -144,10 +178,6 @@ void clearRaceVariables() {
   laser3_interrupted_time = 0;
   laser4_interrupted_time = 0;
   laser5_interrupted_time = 0;
-}
-
-void controlLedForState() {
-  //stateMachine_state
 }
 
 void readAllPins() {
@@ -174,30 +204,30 @@ void readPin(int pin, int* state, int* lastState, long unsigned* lastDebounceTim
 }
 
 void checkLasersInterrupt () {
-  Serial.print("\n checkLasersInterrupt inputPin_Laser0_state:");
-  Serial.println(inputPin_Laser0_state);
+  Serial.print("\n checkLasersInterrupt inputPin_Laser0_state: ");
+  Serial.print(inputPin_Laser0_state);
   if (laser0_interrupted_time == 0 && inputPin_Laser0_state == LOW) {
-    Serial.println("LANE A");
+    Serial.print("LANE A");
     laser0_interrupted_time = millis();
   }
   if (laser1_interrupted_time == 0 && inputPin_Laser1_state == LOW) {
-    Serial.println("LANE B");
+    Serial.print("LANE B");
     laser1_interrupted_time = millis();
   }
   if (laser2_interrupted_time == 0 && inputPin_Laser2_state == LOW) {
-    Serial.println("LANE C");
+    Serial.print("LANE C");
     laser2_interrupted_time = millis();
   }
   if (laser3_interrupted_time == 0 && inputPin_Laser3_state == LOW) {
-    Serial.println("LANE D");
+    Serial.print("LANE D");
     laser3_interrupted_time = millis();
   }
   if (laser4_interrupted_time == 0 && inputPin_Laser4_state == LOW) {
-    Serial.println("LANE E");
+    Serial.print("LANE E");
     laser4_interrupted_time = millis();
   }
   if (laser5_interrupted_time == 0 && inputPin_Laser5_state == LOW) {
-    Serial.println("LANE F");
+    Serial.print("LANE F");
     laser5_interrupted_time = millis();
   }
 }

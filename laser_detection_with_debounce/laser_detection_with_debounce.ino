@@ -151,41 +151,24 @@ void loopSerialCommunication() {
 void onSerialCommandReceived(String content) {
   if (String("STATUS").equals(content)) {
     String output = ("$$STATUS{ \"gate\":");
-    output+=(inputPin_Gate_state);
-    output+=(",\"gate0\":");
-    output+=(inputPin_Laser0_state);
-    output+=(",\"gate1\":");
-    output+=(inputPin_Laser1_state);
-    output+=(",\"gate2\":");
-    output+=(inputPin_Laser2_state);
-    output+=(",\"gate3\":");
-    output+=(inputPin_Laser3_state);
-    output+=(",\"gate4\":");
-    output+=(inputPin_Laser4_state);
-    output+=(",\"gate5\":");
-    output+=(inputPin_Laser5_state);
-    output+=(",\"raceState\":");
-    output+=(stateMachine_state);
-    output+=("}");
-    output+=("%%");
+    output += (inputPin_Gate_state);
+    output += (",\"gate0\":");
+    output += (inputPin_Laser0_state);
+    output += (",\"gate1\":");
+    output += (inputPin_Laser1_state);
+    output += (",\"gate2\":");
+    output += (inputPin_Laser2_state);
+    output += (",\"gate3\":");
+    output += (inputPin_Laser3_state);
+    output += (",\"gate4\":");
+    output += (inputPin_Laser4_state);
+    output += (",\"gate5\":");
+    output += (inputPin_Laser5_state);
+    output += (",\"raceState\":");
+    output += (stateMachine_state);
+    output += ("}");
+    output += ("%%");
     Serial.println(output);
-//    Serial.print("{ \"gate\":");
-//    Serial.print(inputPin_Gate_state);
-//    Serial.print(",\"gate0\":");
-//    Serial.print(inputPin_Laser0_state);
-//    Serial.print(",\"gate1\":");
-//    Serial.print(inputPin_Laser1_state);
-//    Serial.print(",\"gate2\":");
-//    Serial.print(inputPin_Laser2_state);
-//    Serial.print(",\"gate3\":");
-//    Serial.print(inputPin_Laser3_state);
-//    Serial.print(",\"gate4\":");
-//    Serial.print(inputPin_Laser4_state);
-//    Serial.print(",\"gate5\":");
-//    Serial.print(inputPin_Laser5_state);
-//    Serial.print(",\"raceState\":");
-//    Serial.print(stateMachine_state);
-//    Serial.println("}");
   }
   else if (String("BEGIN_RACE").equals(content)) {
     if (stateMachine_state == stateMachine_idle) {

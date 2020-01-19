@@ -178,21 +178,21 @@ void onSerialCommandReceived(String content) {
 }
 
 void notifyRaceFinished() {
-  //TODO convert this to JSON format
-  Serial.print("$$RACE_END");
-  Serial.print(";0,");
-  Serial.print(laser0_interrupted_time - gateOpeningTime);
-  Serial.print(";1,");
-  Serial.print(laser1_interrupted_time - gateOpeningTime);
-  Serial.print(";2,");
-  Serial.print(laser2_interrupted_time - gateOpeningTime);
-  Serial.print(";3,");
-  Serial.print(laser3_interrupted_time - gateOpeningTime);
-  Serial.print(";4,");
-  Serial.print(laser4_interrupted_time - gateOpeningTime);
-  Serial.print(";5,");
-  Serial.print(laser5_interrupted_time - gateOpeningTime);
-  Serial.println("%%");
+  String output = ("$$RACE_END{\"laneTime0\":");
+  output += (laser0_interrupted_time - gateOpeningTime);
+  output += (",\"laneTime1\":");
+  output += (laser1_interrupted_time - gateOpeningTime);
+  output += (",\"laneTime2\":");
+  output += (laser2_interrupted_time - gateOpeningTime);
+  output += (",\"laneTime3\":");
+  output += (laser3_interrupted_time - gateOpeningTime);
+  output += (",\"laneTime4\":");
+  output += (laser4_interrupted_time - gateOpeningTime);
+  output += (",\"laneTime5\":");
+  output += (laser5_interrupted_time - gateOpeningTime);
+  output += ("}");
+  output += ("%%");
+  Serial.println(output);
 }
 
 void controlLedForState() {

@@ -112,7 +112,6 @@ void loopStateMachine() {
       if (hasAllLasersInterrupted()) {
         notifyRaceFinished();
         stateMachine_state = stateMachine_idle;
-        Serial.println("statemachine to IDLE");
       }
       break;
   }

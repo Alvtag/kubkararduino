@@ -68,7 +68,7 @@ void setup() {
   pinMode(inputPin_Laser5, INPUT);
   pinMode(inputPin_Gate, INPUT);
 
-  stateMachine_state = stateMachine_ready;
+  stateMachine_state = stateMachine_idle;
   inputPin_Gate_state = HIGH;
   digitalWrite(outputPin_builtInLed, stateMachine_blink_state);
 }

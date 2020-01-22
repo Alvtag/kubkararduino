@@ -177,7 +177,7 @@ void onSerialCommandReceived(String content) {
 }
 
 void notifyRaceFinished() {
-  String output = ("$$RACE_END{\"laneTime0\":");
+  String output = ("$$END_RACE{\"laneTime0\":");
   output += (laser0_interrupted_time - gateOpeningTime);
   output += (",\"laneTime1\":");
   output += (laser1_interrupted_time - gateOpeningTime);

@@ -1,5 +1,12 @@
 const unsigned long debounceDelay = 50;
 
+boolean trackActive0 = true;
+boolean trackActive1 = true;
+boolean trackActive2 = true;
+boolean trackActive3 = true;
+boolean trackActive4 = true;
+boolean trackActive5 = true;
+
 const int inputPin_Laser0 = 2;
 const int inputPin_Laser1 = 3;
 const int inputPin_Laser2 = 4;
@@ -169,26 +176,58 @@ void onSerialCommandReceived(String content) {
     output += ("%%");
     Serial.println(output);
   }
-  else if (String("BEGIN_RACE").equals(content)) {
+  else if (content.indexOf("BEGIN_RACE") > -1) {
     if (stateMachine_state == stateMachine_idle) {
       stateMachine_state = stateMachine_ready;
+      //active tracks determined by if the content contains the track #
+      //e.g. $$BEGIN_RACE|0135%% indicates tracks 0,1,3,5 will have cars.
+      trackActive0 = content.indexOf('0') > -1;
+      trackActive1 = content.indexOf('1') > -1;
+      trackActive2 = content.indexOf('2') > -1;
+      trackActive3 = content.indexOf('3') > -1;
+      trackActive4 = content.indexOf('4') > -1;
+      trackActive5 = content.indexOf('5') > -1;
     }
   }
 }
 
 void notifyRaceFinished() {
   String output = ("$$END_RACE{\"laneTime0\":");
-  output += (laser0_interrupted_time - gateOpeningTime);
+  if (trackActive0) {
+    output += (laser0_interrupted_time - gateOpeningTime);
+  } else {
+    output += "-1";
+  }
   output += (",\"laneTime1\":");
-  output += (laser1_interrupted_time - gateOpeningTime);
+  if (trackActive1) {
+    output += (laser1_interrupted_time - gateOpeningTime);
+  } else {
+    output += "-1";
+  }
   output += (",\"laneTime2\":");
-  output += (laser2_interrupted_time - gateOpeningTime);
+  if (trackActive2) {
+    output += (laser2_interrupted_time - gateOpeningTime);
+  } else {
+    output += "-1";
+  }
   output += (",\"laneTime3\":");
-  output += (laser3_interrupted_time - gateOpeningTime);
+  if (trackActive3) {
+    output += (laser3_interrupted_time - gateOpeningTime);
+  } else {
+    output += "-1";
+  }
   output += (",\"laneTime4\":");
-  output += (laser4_interrupted_time - gateOpeningTime);
+  if (trackActive4) {
+    output += (laser4_interrupted_time - gateOpeningTime);
+  } else {
+    output += "-1";
+  }
   output += (",\"laneTime5\":");
-  output += (laser5_interrupted_time - gateOpeningTime);
+  if (trackActive5) {
+    output += (laser5_interrupted_time - gateOpeningTime);
+  } else {
+    output += "-1";
+  }
   output += ("}");
   output += ("%%");
   Serial.println(output);
@@ -286,11 +325,13 @@ void checkLasersInterrupt () {
 }
 
 boolean hasAllLasersInterrupted() {
-  boolean result = laser0_interrupted_time > 0 &&
-                   laser1_interrupted_time > 0 &&
-                   laser2_interrupted_time > 0 &&
-                   laser3_interrupted_time > 0 &&
-                   laser4_interrupted_time > 0 &&
-                   laser5_interrupted_time > 0;
-  return result ;
+  // A track is finished if it's not active or its laser gets interrupted.
+  boolean trackFinished0 = !trackActive0 || laser0_interrupted_time > 0;
+  boolean trackFinished1 = !trackActive1 || laser0_interrupted_time > 0;
+  boolean trackFinished2 = !trackActive2 || laser0_interrupted_time > 0;
+  boolean trackFinished3 = !trackActive3 || laser0_interrupted_time > 0;
+  boolean trackFinished4 = !trackActive4 || laser0_interrupted_time > 0;
+  boolean trackFinished5 = !trackActive5 || laser0_interrupted_time > 0;
+  return trackFinished0 && trackFinished1 && trackFinished2 &&
+         trackFinished3 && trackFinished4 && trackFinished5;
 }

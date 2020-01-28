@@ -109,8 +109,8 @@ void loopStateMachine() {
       break;
     case stateMachine_ready:
       if (inputPin_Gate_state == LOW) {
-        gateOpeningTime = millis();
         clearRaceVariables();
+        gateOpeningTime = millis();
         stateMachine_state = stateMachine_racing;
       }
       break;
@@ -272,6 +272,7 @@ void clearRaceVariables() {
   laser3_interrupted_time = 0;
   laser4_interrupted_time = 0;
   laser5_interrupted_time = 0;
+  gateOpeningTime = 0;
 }
 
 void readAllPins() {
@@ -299,27 +300,21 @@ void readPin(int pin, int* state, int* lastState, long unsigned* lastDebounceTim
 
 void checkLasersInterrupt () {
   if (laser0_interrupted_time == 0 && inputPin_Laser0_state == LOW) {
-    Serial.println("LANE A");
     laser0_interrupted_time = millis();
   }
   if (laser1_interrupted_time == 0 && inputPin_Laser1_state == LOW) {
-    Serial.println("LANE B");
     laser1_interrupted_time = millis();
   }
   if (laser2_interrupted_time == 0 && inputPin_Laser2_state == LOW) {
-    Serial.println("LANE C");
     laser2_interrupted_time = millis();
   }
   if (laser3_interrupted_time == 0 && inputPin_Laser3_state == LOW) {
-    Serial.println("LANE D");
     laser3_interrupted_time = millis();
   }
   if (laser4_interrupted_time == 0 && inputPin_Laser4_state == LOW) {
-    Serial.println("LANE E");
     laser4_interrupted_time = millis();
   }
   if (laser5_interrupted_time == 0 && inputPin_Laser5_state == LOW) {
-    Serial.println("LANE F");
     laser5_interrupted_time = millis();
   }
 }
@@ -327,11 +322,11 @@ void checkLasersInterrupt () {
 boolean hasAllLasersInterrupted() {
   // A track is finished if it's not active or its laser gets interrupted.
   boolean trackFinished0 = !trackActive0 || laser0_interrupted_time > 0;
-  boolean trackFinished1 = !trackActive1 || laser0_interrupted_time > 0;
-  boolean trackFinished2 = !trackActive2 || laser0_interrupted_time > 0;
-  boolean trackFinished3 = !trackActive3 || laser0_interrupted_time > 0;
-  boolean trackFinished4 = !trackActive4 || laser0_interrupted_time > 0;
-  boolean trackFinished5 = !trackActive5 || laser0_interrupted_time > 0;
+  boolean trackFinished1 = !trackActive1 || laser1_interrupted_time > 0;
+  boolean trackFinished2 = !trackActive2 || laser2_interrupted_time > 0;
+  boolean trackFinished3 = !trackActive3 || laser3_interrupted_time > 0;
+  boolean trackFinished4 = !trackActive4 || laser4_interrupted_time > 0;
+  boolean trackFinished5 = !trackActive5 || laser5_interrupted_time > 0;
   return trackFinished0 && trackFinished1 && trackFinished2 &&
          trackFinished3 && trackFinished4 && trackFinished5;
 }

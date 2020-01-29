@@ -175,8 +175,7 @@ void onSerialCommandReceived(String content) {
     output += ("}");
     output += ("%%");
     Serial.println(output);
-  }
-  else if (content.indexOf("BEGIN_RACE") > -1) {
+  } else if (content.indexOf("BEGIN_RACE") > -1) {
     if (stateMachine_state == stateMachine_idle) {
       stateMachine_state = stateMachine_ready;
       //active tracks determined by if the content contains the track #
@@ -194,44 +193,43 @@ void onSerialCommandReceived(String content) {
 }
 
 void notifyRaceFinished() {
-  String output = ("$$END_RACE{\"laneTime0\":");
+  String output = ("$$END_RACE{\"l0\":");
   if (trackActive0) {
     output += (laser0_interrupted_time - gateOpeningTime);
   } else {
     output += "-1";
   }
-  output += (",\"laneTime1\":");
+  output += (",\"l1\":");
   if (trackActive1) {
     output += (laser1_interrupted_time - gateOpeningTime);
   } else {
     output += "-1";
   }
-  output += (",\"laneTime2\":");
+  output += (",\"l2\":");
   if (trackActive2) {
     output += (laser2_interrupted_time - gateOpeningTime);
   } else {
     output += "-1";
   }
-  output += (",\"laneTime3\":");
+  output += (",\"l3\":");
   if (trackActive3) {
     output += (laser3_interrupted_time - gateOpeningTime);
   } else {
     output += "-1";
   }
-  output += (",\"laneTime4\":");
+  output += (",\"l4\":");
   if (trackActive4) {
     output += (laser4_interrupted_time - gateOpeningTime);
   } else {
     output += "-1";
   }
-  output += (",\"laneTime5\":");
+  output += (",\"l5\":");
   if (trackActive5) {
     output += (laser5_interrupted_time - gateOpeningTime);
   } else {
     output += "-1";
   }
-  output += ("}");
-  output += ("%%");
+  output += ("}%%");
   Serial.println(output);
 }
 

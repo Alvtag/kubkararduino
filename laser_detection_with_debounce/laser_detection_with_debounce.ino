@@ -188,6 +188,8 @@ void onSerialCommandReceived(String content) {
       trackActive4 = content.indexOf('4') > -1;
       trackActive5 = content.indexOf('5') > -1;
     }
+  } else if (content.indexOf("RESEND_END_RACE" > -1)) {
+    notifyRaceFinished();
   }
 }
 
